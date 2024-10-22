@@ -61,9 +61,9 @@ app.post('/create', async (req, res) => {
         const { lastSeen, location, userId, car } = req.body;
 
         const newData = {
-            lastSeen: new admin.firestore.Timestamp(lastSeen._seconds, lastSeen._nanoseconds), 
-            location: new admin.firestore.GeoPoint(location.latitude, location.longitude), 
-            userId, 
+            lastSeen: new admin.firestore.Timestamp(lastSeen._seconds, lastSeen._nanoseconds),
+            location: new admin.firestore.GeoPoint(location.latitude, location.longitude),
+            userId,
             car,
         };
 
@@ -75,6 +75,42 @@ app.post('/create', async (req, res) => {
         res.status(500).json({ error: 'Failed to create user' });
     }
 });
+
+//  Actual Id is used (6r37Hb0lUSeCS6kPwYoR), maybe change this later 
+app.put('/update/:id', async (req, res) => {
+    try {
+        const { lastSeen, location, userId, car } = req.body;
+        // Retrieve the ID from the request parameters
+        const id = req.params.id;
+        // Retrieve the updated data from the request body
+        const updatedData = {
+            lastSeen: new admin.firestore.Timestamp(lastSeen._seconds, lastSeen._nanoseconds),
+            location: new admin.firestore.GeoPoint(location.latitude, location.longitude),
+            userId,
+            car
+        };
+        // Get a reference to the document to be updated
+        const docRef = admin.firestore().collection('markerInfo').doc(id);
+        // Update the document
+        await docRef.update(updatedData);
+
+        res.status(200).json({ message: 'Document updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+app.delete('/delete/:id', async (req, res) => {
+    try {
+        const docRef = db.collection('markerInfo').doc(req.params.id);
+        await docRef.delete();
+
+        res.status(200).json({ message: 'Document deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+})
+
 
 const db = admin.firestore();
 
