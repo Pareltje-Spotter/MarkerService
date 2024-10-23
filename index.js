@@ -20,6 +20,38 @@ const port = 5002;
 var connection = null;
 var channel = null;
 
+async function requestCarInfo(licenseplate) {
+    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@localhost');
+    channel = await connection.createChannel();
+
+    const queue = 'markerQueue';
+
+    await channel.assertQueue(queue, {
+        durable: false
+    });
+
+    const correlationId = licenseplate.toString();
+    console.log(' [x] Requesting car info:');
+
+    return new Promise((resolve, reject) => {
+        channel.consume(queue, function (msg) {
+            if (msg.properties.correlationId === correlationId) {
+                console.log(' [.] Got: %s', JSON.parse(msg.content) );
+                connection.close();
+                resolve(JSON.parse(msg.content));
+            }
+        }, {
+            noAck: true
+        });
+
+        channel.sendToQueue('carQueue',
+            Buffer.from(licenseplate), {
+            correlationId: correlationId,
+            replyTo: queue
+        });
+    });
+}
+
 // API
 app.get('/read/all', async (req, res) => {
     try {
@@ -42,14 +74,15 @@ app.get('/read/:id', async (req, res) => {
         const markerRef = db.collection('markerInfo').doc(req.params.id);
         const markerData = await markerRef.get();
 
-        //car and user
-        // const responseMessage = await sendMessage(req.params.id);
+        const licenseplate = markerData.data().car;
+        const carData = await requestCarInfo(licenseplate);
 
-        // You can now use responseMessage here
+        // Overwrite the existing car data
         const combinedResponse = {
-            markerData: markerData.data(),
-            // dataFromOtherSource: responseMessage
+            ...markerData.data(),
+            car: carData,
         };
+
         res.send(combinedResponse);
     } catch (error) {
         res.send(error);
