@@ -21,7 +21,7 @@ var connection = null;
 var channel = null;
 
 async function requestCarInfo(licenseplate) {
-    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@localhost');
+    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@rabbitmq');
     channel = await connection.createChannel();
 
     const queue = 'markerQueue';
@@ -53,7 +53,7 @@ async function requestCarInfo(licenseplate) {
 }
 
 // API
-app.get('/read/all', async (req, res) => {
+app.get('markerinfo', async (req, res) => {
     try {
         const markerRef = db.collection('markerInfo');
         const response = await markerRef.get();
@@ -69,7 +69,7 @@ app.get('/read/all', async (req, res) => {
 })
 
 // add connection to user, so when showing the markerinfo also show user (and car)
-app.get('/read/:id', async (req, res) => {
+app.get('/markerinfo/:id', async (req, res) => {
     try {
         const markerRef = db.collection('markerInfo').doc(req.params.id);
         const markerData = await markerRef.get();
@@ -89,7 +89,9 @@ app.get('/read/:id', async (req, res) => {
     }
 })
 
-app.post('/create', async (req, res) => {
+//read/id & read/id met data
+
+app.post('/markerinfo/create', async (req, res) => {
     try {
         const { lastSeen, location, userId, car } = req.body;
 
@@ -110,7 +112,7 @@ app.post('/create', async (req, res) => {
 });
 
 //  Actual Id is used (6r37Hb0lUSeCS6kPwYoR), maybe change this later 
-app.put('/update/:id', async (req, res) => {
+app.put('/markerinfo/update/:id', async (req, res) => {
     try {
         const { lastSeen, location, userId, car } = req.body;
         // Retrieve the ID from the request parameters
@@ -133,7 +135,7 @@ app.put('/update/:id', async (req, res) => {
     }
 });
 
-app.delete('/delete/:id', async (req, res) => {
+app.delete('/markerinfo/delete/:id', async (req, res) => {
     try {
         const docRef = db.collection('markerInfo').doc(req.params.id);
         await docRef.delete();
