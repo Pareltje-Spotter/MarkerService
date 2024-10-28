@@ -21,7 +21,7 @@ var connection = null;
 var channel = null;
 
 async function requestCarInfo(licenseplate) {
-    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@rabbitmq');
+    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@localhost');
     channel = await connection.createChannel();
 
     const queue = 'markerQueue';
@@ -53,7 +53,7 @@ async function requestCarInfo(licenseplate) {
 }
 
 // API
-app.get('markerinfo', async (req, res) => {
+app.get('/markerinfo', async (req, res) => {
     try {
         const markerRef = db.collection('markerInfo');
         const response = await markerRef.get();
