@@ -27,16 +27,7 @@ exports.getMarkerById = async (req, res) => {
 exports.createMarker = async (req, res) => {
     try {
         const { lastSeen, location, userId, car } = req.body;
-
-        //will change bc of mongo
-        const newData = {
-            lastSeen: new admin.firestore.Timestamp(lastSeen._seconds, lastSeen._nanoseconds),
-            location: new admin.firestore.GeoPoint(location.latitude, location.longitude),
-            userId,
-            car,
-        };
-
-        const newMarker = await markerInfoService.createMarker(newData);
+        const newMarker = await markerInfoService.createMarker(req.body);
         res.status(201).json(newMarker);
     } catch (error) {
         res.status(500).json({ error: 'Failed to create marker' });
@@ -47,15 +38,7 @@ exports.updateMarker = async (req, res) => {
     try {
         const { lastSeen, location, userId, car } = req.body;
         const id = req.params.id;
-
-        const updatedData = {
-            lastSeen: new admin.firestore.Timestamp(lastSeen._seconds, lastSeen._nanoseconds),
-            location: new admin.firestore.GeoPoint(location.latitude, location.longitude),
-            userId,
-            car
-        };
-
-        const updatedMarker = await markerInfoService.updateMarker(id, updatedData);
+        const updatedMarker = await markerInfoService.updateMarker(id, req.body);
         res.status(200).json(updatedMarker);
     } catch (error) {
         res.status(500).json({ error: 'Failed to update marker' });
