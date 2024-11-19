@@ -2,7 +2,6 @@ const express = require('express')
 const cors = require('cors')
 const amqplib = require('amqplib')
 const admin = require('firebase-admin');
-// var serviceAccount = require("./key.json");
 const markerInfoController = require('./controllers/MarkerInfoController');
 
 const app = express();
