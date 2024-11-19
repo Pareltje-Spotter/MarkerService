@@ -1,0 +1,26 @@
+name: Docker Image
+
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  Docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Login to registry
+        run: >
+          echo ${{ secrets.REGISTRY_PASSWORD }}
+          | sudo docker login
+          -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+      
+      - name: Build image
+        run: >
+          sudo docker build . --file Dockerfile
+          --tag niels040/pareltje-spotter:latest-markerservice
+      
+      - name: Push to registry
+        run: sudo docker push niels040/pareltje-spotter:latest-markerservice
