@@ -29,8 +29,8 @@ var connection = null;
 var channel = null;
 
 exports.requestCarInfo = async (licenseplate) => {
-    // connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@rabbitmq');
-    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@localhost');
+    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@rabbitmq');
+    // connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@localhost');
     channel = await connection.createChannel();
 
     const queue = 'markerCarQueue';
