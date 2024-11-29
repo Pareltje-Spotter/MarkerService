@@ -38,7 +38,7 @@ exports.getMarkerById = async (id) => {
   const combinedResponse = {
     ...response,
     // userId: await app.requestUserInfo(response.userId),
-    car: await app.requestCarInfo(response.car),
+    // car: await app.requestCarInfo(response.car),
   };
 
   return combinedResponse;
