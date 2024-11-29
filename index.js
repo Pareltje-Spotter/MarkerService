@@ -89,7 +89,7 @@ exports.requestUserInfo = async (userId) => {
         });
 
         channel.sendToQueue('userQueue',
-            Buffer.from(userId.toString()), {
+            Buffer.from(userId), {
             correlationId: correlationId,
             replyTo: queue
         });
