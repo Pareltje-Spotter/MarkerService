@@ -20,7 +20,7 @@ exports.getMarkerById = async (req, res) => {
         }
         res.status(200).json(marker);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to retrieve Marker' });
+        res.status(500).json({ error: 'Failed to retrieve Marker: ' + error });
     }
 };
 

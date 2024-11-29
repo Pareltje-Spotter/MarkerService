@@ -8,6 +8,7 @@ const ObjectID = require('mongodb').ObjectId;
 
 // Place in db config
 const uri = "mongodb://mongoadmin:mongoadmin@mongo:27017";
+// const uri = "mongodb://mongoadmin:mongoadmin@localhost:27017";
 const client = new MongoClient(uri,);
 
 async function connectToMongoDB() {
@@ -36,6 +37,7 @@ exports.getMarkerById = async (id) => {
 
   const combinedResponse = {
     ...response,
+    userId: await app.requestUserInfo(response.userId),
     car: await app.requestCarInfo(response.car),
   };
 

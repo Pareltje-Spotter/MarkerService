@@ -29,10 +29,11 @@ var connection = null;
 var channel = null;
 
 exports.requestCarInfo = async (licenseplate) => {
-    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@rabbitmq');
+    // connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@rabbitmq');
+    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@localhost');
     channel = await connection.createChannel();
 
-    const queue = 'markerQueue';
+    const queue = 'markerCarQueue';
 
     await channel.assertQueue(queue, {
         durable: false
@@ -54,6 +55,41 @@ exports.requestCarInfo = async (licenseplate) => {
 
         channel.sendToQueue('carQueue',
             Buffer.from(licenseplate), {
+            correlationId: correlationId,
+            replyTo: queue
+        });
+    });
+}
+
+exports.requestUserInfo = async (userId) => {
+    connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@rabbitmq');
+    // connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@localhost');
+
+    channel = await connection.createChannel();
+
+    const queue = 'markerUserQueue';
+
+    await channel.assertQueue(queue, {
+        durable: false
+    });
+
+    
+    const correlationId = userId.toString();
+    console.log(' [x] Requesting user info:' + correlationId);
+
+    return new Promise((resolve, reject) => {
+        channel.consume(queue, function (msg) {
+            if (msg.properties.correlationId === correlationId) {
+                console.log(' [.] Got: %s', JSON.parse(msg.content));
+                connection.close();
+                resolve(JSON.parse(msg.content));
+            }
+        }, {
+            noAck: true
+        });
+
+        channel.sendToQueue('userQueue',
+            Buffer.from(userId), {
             correlationId: correlationId,
             replyTo: queue
         });
