@@ -64,3 +64,10 @@ exports.deleteMarker = async (id) => {
   const result = await collection.deleteOne({ _id: new ObjectID(id) });
   return { message: 'Document updated successfully' };
 };
+
+exports.deleteMarkerByUser = async (id) => {
+  const db = await connectToMongoDB();
+  const collection = db.collection('info')
+  const result = await collection.deleteMany({ userId: parseInt(id) });
+  return { message: 'success' };
+};

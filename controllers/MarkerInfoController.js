@@ -55,3 +55,14 @@ exports.deleteMarker = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete marker' });
     }
 };
+
+exports.deleteMarkerByUser = async (id) => {
+    try {
+        const deletedMarker = await markerInfoService.deleteMarkerByUser(id);
+        if (deletedMarker.message == "success") {
+            return true
+        }
+    } catch (error) {
+        return false
+    }
+};

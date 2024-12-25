@@ -73,7 +73,7 @@ exports.requestUserInfo = async (userId) => {
         durable: false
     });
 
-    
+
     const correlationId = userId.toString();
     console.log(' [x] Requesting user info:' + correlationId);
 
@@ -95,6 +95,48 @@ exports.requestUserInfo = async (userId) => {
         });
     });
 }
+
+
+const QUEUE_NAME = 'user-deletion';
+
+// Initialize RabbitMQ and start listening to messages
+async function initRabbitMQConsumer() {
+    try {
+        const connection = await amqplib.connect('amqp://rabbitmq:rabbitmq@rabbitmq');
+        const channel = await connection.createChannel();
+
+        await channel.assertQueue(QUEUE_NAME, { durable: true });
+        console.log(`Connected to RabbitMQ and listening to queue: ${QUEUE_NAME}`);
+
+        channel.consume(QUEUE_NAME, (msg) => {
+            if (msg !== null) {
+                const messageContent = msg.content.toString();
+                const { userId } = JSON.parse(messageContent);
+
+                console.log(`Received message:`, messageContent);
+
+                // Process the message
+                handleUserDeletion(userId);
+
+                // Acknowledge the message
+                channel.ack(msg);
+            }
+        });
+    } catch (error) {
+        console.error('Failed to initialize RabbitMQ consumer:', error);
+        process.exit(1);
+    }
+}
+
+// Function to process user deletion messages
+function handleUserDeletion(userId) {
+    console.log(`Processing user deletion for user ID: ${userId}`);
+    let deletedMarkers = markerInfoController.deleteMarkerByUser(userId);
+    console.log(`Completed processing user deletion for user ID: ${userId}`);
+}
+
+// Start the consumer
+initRabbitMQConsumer();
 
 app.listen(port, async () => {
     console.log(`Server is running on PORT ${port}`);
